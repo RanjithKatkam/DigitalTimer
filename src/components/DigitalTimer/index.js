@@ -7,6 +7,7 @@ class DigitalTimer extends Component {
     isTimeRunning: false,
     minutesTime: 25,
     secondsTime: 0,
+    timerLimit: 25,
   }
 
   increaseTime = () => {
@@ -14,6 +15,7 @@ class DigitalTimer extends Component {
     if (isTimeRunning === false) {
       this.setState(prevState => ({
         minutesTime: prevState.minutesTime + 1,
+        timerLimit: prevState.timerLimit + 1,
       }))
     }
   }
@@ -23,6 +25,7 @@ class DigitalTimer extends Component {
     if (isTimeRunning === false && minutesTime > 1) {
       this.setState(prevState => ({
         minutesTime: prevState.minutesTime - 1,
+        timerLimit: prevState.timerLimit - 1,
       }))
     }
   }
@@ -61,30 +64,36 @@ class DigitalTimer extends Component {
   }
 
   startOrPauseTimer = () => {
-    this.setState(prevState => ({isTimeRunning: !prevState.isTimeRunning}))
-
-    const {isTimeRunning} = this.state
+    const {isTimeRunning, secondsTime, minutesTime, timerLimit} = this.state
 
     if (isTimeRunning) {
       this.clearTimerInterval()
     } else {
-      this.setState({secondsTime: 59})
-      this.setState(prevState => ({minutesTime: prevState.minutesTime - 1}))
       this.secondsTimerInterval = setInterval(this.startTimerInterval, 1000)
       this.minutesTimerInterval = setInterval(
         this.startTimerInterval2,
         1000 * 59,
       )
     }
+
+    if (secondsTime === 0) {
+      this.setState({secondsTime: 59})
+    }
+
+    if (timerLimit === minutesTime) {
+      this.setState(prevState => ({minutesTime: prevState.minutesTime - 1}))
+    }
+
+    this.setState(prevState => ({isTimeRunning: !prevState.isTimeRunning}))
   }
 
   resetTimer = () => {
-    this.clearTimerInterval()
     this.setState({isTimeRunning: false, minutesTime: 25, secondsTime: 0})
+    this.clearTimerInterval()
   }
 
   render() {
-    const {isTimeRunning, minutesTime, secondsTime} = this.state
+    const {isTimeRunning, minutesTime, secondsTime, timerLimit} = this.state
     const timerStatus = isTimeRunning ? 'Running' : 'Paused'
     const playOrPauseImage = isTimeRunning
       ? 'https://assets.ccbp.in/frontend/react-js/pause-icon-img.png'
@@ -142,7 +151,7 @@ class DigitalTimer extends Component {
                 >
                   -
                 </button>
-                <p>{minutesTime}</p>
+                <p>{timerLimit}</p>
                 <button
                   onClick={this.increaseTime}
                   className="plus-minus"
